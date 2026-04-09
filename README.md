@@ -85,6 +85,7 @@ The package publishes `config/notifications.php` with these main options:
 
 - `views_path`: application path for custom templates
 - `default_dispatch`: `sync`, `queue`, or `event`
+- `dispatchers`: dispatch strategy map used by `NotificationManager`
 - `default_channel`: default channel used by `BaseNotification` and `GenericNotification`
 - `queue`: queue name for background processing
 - `channels`: registered notification channels

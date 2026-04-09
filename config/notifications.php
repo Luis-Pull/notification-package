@@ -19,6 +19,17 @@ return [
     'default_dispatch' => 'queue',
 
     /*
+     | Available dispatch strategies.
+     | The selected strategy is resolved from `default_dispatch`
+     | or from the notification's `dispatchMethod()`.
+    */
+    'dispatchers' => [
+        'sync' => \Packages\Notifications\Dispatch\SyncDispatch::class,
+        'queue' => \Packages\Notifications\Dispatch\QueueDispatch::class,
+        'event' => \Packages\Notifications\Dispatch\EventDispatch::class,
+    ],
+
+    /*
      | Default channel used by GenericNotification when no channel is provided.
     */
     'default_channel' => 'mail',

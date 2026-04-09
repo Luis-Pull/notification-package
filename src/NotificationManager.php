@@ -6,22 +6,11 @@ namespace Packages\Notifications;
 
 use Packages\Notifications\Contracts\DispatchStrategy;
 use Packages\Notifications\Contracts\NotificationChannel;
-use Packages\Notifications\Dispatch\EventDispatch;
 use Packages\Notifications\Dispatch\QueueDispatch;
-use Packages\Notifications\Dispatch\SyncDispatch;
 use Packages\Notifications\Support\ChannelRegistry;
 
 final class NotificationManager
 {
-    /**
-     * @var array<string, class-string<DispatchStrategy>>
-     */
-    private array $strategyMap = [
-        'sync' => SyncDispatch::class,
-        'queue' => QueueDispatch::class,
-        'event' => EventDispatch::class,
-    ];
-
     /**
      * Create a new notification manager.
      */
@@ -42,7 +31,9 @@ final class NotificationManager
     {
         $notification ??= new GenericNotification('Notification', $data);
 
-        $strategyClass = $this->strategyMap[$notification->dispatchMethod()] ?? QueueDispatch::class;
+        /** @var array<string, class-string<DispatchStrategy>> $strategyMap */
+        $strategyMap = (array) config('notifications.dispatchers', []);
+        $strategyClass = $strategyMap[$notification->dispatchMethod()] ?? QueueDispatch::class;
         /** @var DispatchStrategy $strategy */
         $strategy = app($strategyClass);
 
