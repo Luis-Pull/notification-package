@@ -1,6 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use Packages\Notifications\Channels\MailChannel;
+use Packages\Notifications\Channels\PushChannel;
+use Packages\Notifications\Channels\SmsChannel;
+use Packages\Notifications\Channels\WhatsappChannel;
+use Packages\Notifications\Dispatch\EventDispatch;
+use Packages\Notifications\Dispatch\QueueDispatch;
+use Packages\Notifications\Dispatch\SyncDispatch;
 
 return [
     /*
@@ -24,9 +31,9 @@ return [
      | or from the notification's `dispatchMethod()`.
     */
     'dispatchers' => [
-        'sync' => \Packages\Notifications\Dispatch\SyncDispatch::class,
-        'queue' => \Packages\Notifications\Dispatch\QueueDispatch::class,
-        'event' => \Packages\Notifications\Dispatch\EventDispatch::class,
+        'sync' => SyncDispatch::class,
+        'queue' => QueueDispatch::class,
+        'event' => EventDispatch::class,
     ],
 
     /*
@@ -43,9 +50,9 @@ return [
      | Registered channels. Add custom channels here.
     */
     'channels' => [
-        'mail' => \Packages\Notifications\Channels\MailChannel::class,
-        'sms' => \Packages\Notifications\Channels\SmsChannel::class,
-        'push' => \Packages\Notifications\Channels\PushChannel::class,
-        'whatsapp' => \Packages\Notifications\Channels\WhatsappChannel::class,
+        'mail' => MailChannel::class,
+        'sms' => SmsChannel::class,
+        'push' => PushChannel::class,
+        'whatsapp' => WhatsappChannel::class,
     ],
 ];

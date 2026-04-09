@@ -14,7 +14,7 @@ final class GenericMailable extends Mailable
     use SerializesModels;
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function __construct(
         private readonly string $subjectLine,

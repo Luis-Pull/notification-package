@@ -21,14 +21,13 @@ final class NotificationManager
     /**
      * Send the notification using the configured dispatch strategy.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function send(
         object $notifiable,
         ?BaseNotification $notification = null,
         array $data = [],
-    ): void
-    {
+    ): void {
         $notification ??= new GenericNotification('Notification', $data);
 
         /** @var array<string, class-string<DispatchStrategy>> $strategyMap */

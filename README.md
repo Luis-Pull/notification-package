@@ -65,6 +65,28 @@ After installing in the host app, it is usually a good idea to clear cached meta
 php artisan optimize:clear
 ```
 
+## Development
+
+Install development dependencies:
+
+```bash
+composer install
+```
+
+Format the package:
+
+```bash
+composer format
+```
+
+Check formatting without modifying files:
+
+```bash
+composer lint
+```
+
+If you use VS Code, this repository includes `.vscode/settings.json` to format PHP files on save with Laravel Pint. You only need the `Laravel Pint` VS Code extension installed.
+
 ## Publish package files
 
 Publish config:

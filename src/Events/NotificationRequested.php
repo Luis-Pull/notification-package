@@ -14,7 +14,7 @@ final class NotificationRequested
     use SerializesModels;
 
     /**
-     * @param list<string> $channels
+     * @param  list<string>  $channels
      */
     public function __construct(
         public readonly object $notifiable,

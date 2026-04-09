@@ -13,7 +13,7 @@ final class QueueDispatch implements DispatchStrategy
     /**
      * Dispatch the notification through queued jobs.
      *
-     * @param list<string> $channels
+     * @param  list<string>  $channels
      */
     public function dispatch(object $notifiable, BaseNotification $notification, array $channels): void
     {

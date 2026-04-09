@@ -9,7 +9,7 @@ use Packages\Notifications\Contracts\HasNotificationPayload;
 final class SmsPayload implements HasNotificationPayload
 {
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function __construct(
         private readonly array $data = [],

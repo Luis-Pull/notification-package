@@ -21,7 +21,7 @@ class NotificationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/notifications.php', 'notifications');
 
         $this->app->singleton(ChannelRegistry::class, function ($app): ChannelRegistry {
-            $registry = new ChannelRegistry();
+            $registry = new ChannelRegistry;
 
             foreach ((array) config('notifications.channels', []) as $name => $channelClass) {
                 $registry->register((string) $name, $app->make($channelClass));

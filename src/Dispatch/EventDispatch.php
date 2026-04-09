@@ -13,7 +13,7 @@ final class EventDispatch implements DispatchStrategy
     /**
      * Dispatch the notification by firing a background event.
      *
-     * @param list<string> $channels
+     * @param  list<string>  $channels
      */
     public function dispatch(object $notifiable, BaseNotification $notification, array $channels): void
     {

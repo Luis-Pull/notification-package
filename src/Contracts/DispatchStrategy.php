@@ -11,7 +11,7 @@ interface DispatchStrategy
     /**
      * Dispatch the notification through the selected channels.
      *
-     * @param list<string> $channels
+     * @param  list<string>  $channels
      */
     public function dispatch(object $notifiable, BaseNotification $notification, array $channels): void;
 }

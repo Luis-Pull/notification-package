@@ -13,7 +13,7 @@ final class GenericPushEvent implements ShouldBroadcastNow
     use SerializesModels;
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function __construct(
         private readonly string $channel,

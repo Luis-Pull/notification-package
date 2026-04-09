@@ -20,7 +20,7 @@ final class SyncDispatch implements DispatchStrategy
     /**
      * Dispatch the notification immediately in the current process.
      *
-     * @param list<string> $channels
+     * @param  list<string>  $channels
      */
     public function dispatch(object $notifiable, BaseNotification $notification, array $channels): void
     {
