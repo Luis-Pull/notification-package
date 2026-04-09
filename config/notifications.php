@@ -80,6 +80,7 @@ return [
             'created',
             'updated',
             'deleted',
+            'default',
         ],
 
         'defaults' => [
