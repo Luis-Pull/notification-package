@@ -1,0 +1,48 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "batchnav/notification-package",
+    "description": "Direct multi-channel notification transport for Laravel.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "notifications",
+        "multi-channel",
+        "mail",
+        "sms",
+        "push",
+        "whatsapp"
+    ],
+    "authors": [
+        {
+            "name": "Batchnav",
+            "email": "contact@batchnav.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/events": "^11.0|^12.0",
+        "illuminate/mail": "^11.0|^12.0",
+        "illuminate/queue": "^11.0|^12.0",
+        "illuminate/broadcasting": "^11.0|^12.0",
+        "illuminate/view": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Packages\\Notifications\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Packages\\Notifications\\NotificationServiceProvider"
+            ],
+            "aliases": {
+                "Notify": "Packages\\Notifications\\Facades\\Notify"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
