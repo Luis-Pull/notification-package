@@ -1,39 +1,31 @@
 # Laravel Notification Package
 
-Standalone notification package for Laravel with support for `mail`, `sms`, `push`, and `whatsapp`.
+Simple multi-channel notification package for Laravel.
 
-The package is built around a simple default:
+Supports:
 
-- `Notify::send($notifiable)` sends a generic notification through the configured default channel
-- `Notify::send($notifiable, new CustomNotification())` sends a custom notification class
-- `BaseNotification` already provides default channel, dispatch, subject, template resolution, and payload builders
+- `mail`
+- `sms`
+- `push`
+- `whatsapp`
 
 ## Requirements
 
 - PHP 8.3+
-- Laravel 11 or 12
+- Laravel 12+
 
-## Features
+## Install
 
-- Sensible defaults in `BaseNotification`
-- Generic notification out of the box
-- Multiple channels per notification
-- Dispatch modes: `sync`, `queue`, `event`
-- Custom Blade templates per channel
-- Runtime extension for custom channels
+### Local path repository
 
-## Installation
-
-### Option 1: Local path repository
-
-If you want to use this package from another project on the same machine, add this to the host project's `composer.json`:
+In the host project's `composer.json`:
 
 ```json
 {
     "repositories": [
         {
             "type": "path",
-            "url": "../notification-package-v0.2",
+            "url": "../notification-package",
             "options": {
                 "symlink": true
             }
@@ -45,122 +37,62 @@ If you want to use this package from another project on the same machine, add th
 }
 ```
 
-Then run:
-
-```bash
-composer update batchnav/notification-package -W
-```
-
-### Option 2: Packagist or private Composer repository
+### Composer repository
 
 ```bash
 composer require batchnav/notification-package
-```
-
-Laravel package discovery will automatically register the service provider and facade.
-
-After installing in the host app, it is usually a good idea to clear cached metadata:
-
-```bash
 php artisan optimize:clear
 ```
 
-## Development
-
-Install development dependencies:
-
-```bash
-composer install
-```
-
-Format the package:
-
-```bash
-composer format
-```
-
-Check formatting without modifying files:
-
-```bash
-composer lint
-```
-
-If you use VS Code, this repository includes `.vscode/settings.json` to format PHP files on save with Laravel Pint. You only need the `Laravel Pint` VS Code extension installed.
-
-## Publish package files
-
-Publish config:
+## Publish
 
 ```bash
 php artisan vendor:publish --tag=notifications-config
-```
-
-Publish views:
-
-```bash
 php artisan vendor:publish --tag=notifications-views
 ```
 
-## Configuration
-
-The package publishes `config/notifications.php` with these main options:
-
-- `views_path`: application path for custom templates
-- `default_dispatch`: `sync`, `queue`, or `event`
-- `dispatchers`: dispatch strategy map used by `NotificationManager`
-- `default_channel`: default channel used by `BaseNotification` and `GenericNotification`
-- `queue`: queue name for background processing
-- `channels`: registered notification channels
-
-If you use the default dispatch mode `queue`, run a worker:
+If you use queued notifications:
 
 ```bash
-php artisan queue:work --queue=notifications
+php artisan queue:work --queue=notifications,default
 ```
 
-## Register SMS and WhatsApp providers
+## Basic Usage
 
-The package includes the channel contracts, but your application must bind the real provider implementations.
-
-Example in `AppServiceProvider`:
+Generic notification:
 
 ```php
-<?php
+use Packages\Notifications\Facades\Notify;
 
-namespace App\Providers;
-
-use App\Services\TwilioSmsProvider;
-use App\Services\WhatsappCloudProvider;
-use Illuminate\Support\ServiceProvider;
-use Packages\Notifications\Contracts\SmsProvider;
-use Packages\Notifications\Contracts\WhatsappProvider;
-
-class AppServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        $this->app->bind(SmsProvider::class, TwilioSmsProvider::class);
-        $this->app->bind(WhatsappProvider::class, WhatsappCloudProvider::class);
-    }
-}
+Notify::send($user);
 ```
 
-If you use the `push` channel, make sure Laravel broadcasting is configured in the host application.
+Generic notification with data:
 
-## How It Works
+```php
+Notify::send($user, null, [
+    'name' => $user->name,
+    'email' => $user->email,
+]);
+```
 
-`BaseNotification` already contains the default behavior for:
+Custom notification:
 
-- `channels()`
-- `dispatchMethod()`
-- `data()`
-- `subject()`
-- `template($channel)`
-- `toMail()`, `toSms()`, `toPush()`, `toWhatsapp()`
-
-That means child classes only need to override what they actually want to change.
+```php
+Notify::send($user, new WelcomeNotification($user->name));
+```
 
 ## Create a Notification
+
+`BaseNotification` already provides defaults for:
+
+- channel
+- dispatch
+- subject
+- template
+- payload builders
+
+Example:
 
 ```php
 <?php
@@ -204,57 +136,55 @@ class WelcomeNotification extends BaseNotification
 }
 ```
 
-If you do not override `template($channel)`, the package uses the default template for that channel.
+## Push
 
-## Send Notifications
+Push channels and allowed actions are defined in `config/notifications.php`.
 
-```php
-use Packages\Notifications\Facades\Notify;
-
-Notify::send($user, new WelcomeNotification($user->name));
-```
-
-You can also send a minimal generic notification with only the notifiable:
+Example:
 
 ```php
-use Packages\Notifications\Facades\Notify;
-
-Notify::send($user);
+'push' => [
+    'channels' => [
+        'public' => [
+            'type' => 'public',
+            'name' => 'batchnav.notifications.public',
+        ],
+        'private' => [
+            'type' => 'private',
+            'name' => 'batchnav.notifications.private.{id}',
+        ],
+    ],
+    'actions' => [
+        'created',
+        'updated',
+        'deleted',
+    ],
+    'defaults' => [
+        'channel' => 'public',
+    ],
+],
 ```
 
-In that case the package:
+Private broadcast channels are registered automatically by the package. No manual `routes/channels.php` entry is required for package-defined push channels.
 
-- Uses `GenericNotification`
-- Uses the channel from `notifications.default_channel`
-- Defaults the subject to `Notification`
-- Uses the default channel template for `mail`, `sms`, `push`, or `whatsapp` unless a child class overrides `template($channel)`
 
-You can also pass data to the generic notification:
+## Providers
+
+If you use `sms` or `whatsapp`, bind your providers in the host app:
 
 ```php
-use Packages\Notifications\Facades\Notify;
+use App\Services\TwilioSmsProvider;
+use App\Services\WhatsappCloudProvider;
+use Packages\Notifications\Contracts\SmsProvider;
+use Packages\Notifications\Contracts\WhatsappProvider;
 
-Notify::send($user, null, [
-    'name' => $user->name,
-    'email' => $user->email,
-]);
+$this->app->bind(SmsProvider::class, TwilioSmsProvider::class);
+$this->app->bind(WhatsappProvider::class, WhatsappCloudProvider::class);
 ```
 
-This third argument is only used when the second argument is omitted.
+## Templates
 
-## Notifiable object requirements
-
-The package reads properties directly from the notifiable object:
-
-- `mail` expects `$notifiable->email`
-- `sms` expects `$notifiable->phone`
-- `whatsapp` expects `$notifiable->phone`
-
-Any model or DTO can be used as long as those properties exist.
-
-## Custom templates
-
-Custom templates are resolved from:
+Custom templates:
 
 ```text
 resources/views/notifications/mail/{template}.blade.php
@@ -263,50 +193,14 @@ resources/views/notifications/push/{template}.blade.php
 resources/views/notifications/whatsapp/{template}.blade.php
 ```
 
-If no custom template is found, the package falls back to the default package views.
+If a custom template does not exist, the package uses its default view.
 
-`BaseNotification` already handles default templates per channel. Child classes only need to override `template(string $channel)` when they want a custom one.
-
-Default package templates live here:
-
-```text
-resources/views/mail/default.blade.php
-resources/views/sms/default.blade.php
-resources/views/push/default.blade.php
-resources/views/whatsapp/default.blade.php
-```
-
-## Custom channels
-
-You can register custom channels from the host application:
-
-```php
-use Packages\Notifications\Facades\Notify;
-
-Notify::extend('slack', app(SlackChannel::class));
-```
-
-You can also add channels through the published config file.
-
-## Publishing this package
-
-Before publishing to a public repository or Packagist, review these items:
-
-1. Keep `batchnav/notification-package` if consuming projects already depend on that name.
-2. Add package metadata such as `homepage`, `support`, and repository URL if needed.
-3. Replace the placeholder owner in `LICENSE`.
-4. Create semantic version tags such as `v0.1.0` or `v1.0.0`.
-
-## Suggested Git workflow
+## Development
 
 ```bash
-git add .
-git commit -m "Initial package release"
-git branch -M main
-git remote add origin <your-repository-url>
-git push -u origin main
+composer install
+composer format
+composer lint
 ```
 
-If `git push -u origin main` fails with `src refspec main does not match any`, it means you still have no commit. Run `git add .` and `git commit` first.
-
-If you publish to Packagist, connect the repository there after the first push.
+If you use VS Code, this repo already includes format-on-save settings for Laravel Pint.
