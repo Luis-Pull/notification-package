@@ -2,14 +2,21 @@
 
 Standalone notification package for Laravel with support for `mail`, `sms`, `push`, and `whatsapp`.
 
+The package is built around a simple default:
+
+- `Notify::send($notifiable)` sends a generic notification through the configured default channel
+- `Notify::send($notifiable, new CustomNotification())` sends a custom notification class
+- `BaseNotification` already provides default channel, dispatch, subject, template resolution, and payload builders
+
 ## Requirements
 
-- PHP 8.2+
+- PHP 8.3+
 - Laravel 11 or 12
 
 ## Features
 
-- Single notification abstraction
+- Sensible defaults in `BaseNotification`
+- Generic notification out of the box
 - Multiple channels per notification
 - Dispatch modes: `sync`, `queue`, `event`
 - Custom Blade templates per channel
@@ -41,7 +48,7 @@ If you want to use this package from another project on the same machine, add th
 Then run:
 
 ```bash
-composer update batchnav/notification-package
+composer update batchnav/notification-package -W
 ```
 
 ### Option 2: Packagist or private Composer repository
@@ -51,6 +58,12 @@ composer require batchnav/notification-package
 ```
 
 Laravel package discovery will automatically register the service provider and facade.
+
+After installing in the host app, it is usually a good idea to clear cached metadata:
+
+```bash
+php artisan optimize:clear
+```
 
 ## Publish package files
 
@@ -72,7 +85,7 @@ The package publishes `config/notifications.php` with these main options:
 
 - `views_path`: application path for custom templates
 - `default_dispatch`: `sync`, `queue`, or `event`
-- `default_channel`: default channel for generic named notifications
+- `default_channel`: default channel used by `BaseNotification` and `GenericNotification`
 - `queue`: queue name for background processing
 - `channels`: registered notification channels
 
@@ -111,7 +124,20 @@ class AppServiceProvider extends ServiceProvider
 
 If you use the `push` channel, make sure Laravel broadcasting is configured in the host application.
 
-## Create a notification
+## How It Works
+
+`BaseNotification` already contains the default behavior for:
+
+- `channels()`
+- `dispatchMethod()`
+- `data()`
+- `subject()`
+- `template($channel)`
+- `toMail()`, `toSms()`, `toPush()`, `toWhatsapp()`
+
+That means child classes only need to override what they actually want to change.
+
+## Create a Notification
 
 ```php
 <?php
@@ -138,7 +164,9 @@ class WelcomeNotification extends BaseNotification
 
     public function data(): array
     {
-        return ['name' => $this->name];
+        return [
+            'name' => $this->name,
+        ];
     }
 
     public function subject(): string
@@ -153,7 +181,9 @@ class WelcomeNotification extends BaseNotification
 }
 ```
 
-## Send a notification
+If you do not override `template($channel)`, the package uses the default template for that channel.
+
+## Send Notifications
 
 ```php
 use Packages\Notifications\Facades\Notify;
@@ -187,6 +217,8 @@ Notify::send($user, null, [
 ]);
 ```
 
+This third argument is only used when the second argument is omitted.
+
 ## Notifiable object requirements
 
 The package reads properties directly from the notifiable object:
@@ -212,6 +244,15 @@ If no custom template is found, the package falls back to the default package vi
 
 `BaseNotification` already handles default templates per channel. Child classes only need to override `template(string $channel)` when they want a custom one.
 
+Default package templates live here:
+
+```text
+resources/views/mail/default.blade.php
+resources/views/sms/default.blade.php
+resources/views/push/default.blade.php
+resources/views/whatsapp/default.blade.php
+```
+
 ## Custom channels
 
 You can register custom channels from the host application:
@@ -228,19 +269,21 @@ You can also add channels through the published config file.
 
 Before publishing to a public repository or Packagist, review these items:
 
-1. Keep `batchnav/notification-package` if this package is a drop-in replacement for the old package, or change it only if the consuming projects will also be updated.
-2. Add package metadata such as `authors`, `homepage`, `support`, and repository URL if needed.
+1. Keep `batchnav/notification-package` if consuming projects already depend on that name.
+2. Add package metadata such as `homepage`, `support`, and repository URL if needed.
 3. Replace the placeholder owner in `LICENSE`.
 4. Create semantic version tags such as `v0.1.0` or `v1.0.0`.
 
 ## Suggested Git workflow
 
 ```bash
-git init -b main
 git add .
 git commit -m "Initial package release"
+git branch -M main
 git remote add origin <your-repository-url>
 git push -u origin main
 ```
+
+If `git push -u origin main` fails with `src refspec main does not match any`, it means you still have no commit. Run `git add .` and `git commit` first.
 
 If you publish to Packagist, connect the repository there after the first push.
