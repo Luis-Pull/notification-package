@@ -16,6 +16,7 @@ final class PushPayload implements HasNotificationPayload
         private readonly string $event,
         private readonly array $data = [],
         private readonly ?string $template = null,
+        private readonly bool $private = false,
     ) {}
 
     /**
@@ -50,5 +51,13 @@ final class PushPayload implements HasNotificationPayload
     public function event(): string
     {
         return $this->event;
+    }
+
+    /**
+     * Determine whether the resolved broadcast channel is private.
+     */
+    public function isPrivate(): bool
+    {
+        return $this->private;
     }
 }

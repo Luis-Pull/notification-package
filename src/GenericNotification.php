@@ -15,22 +15,6 @@ final class GenericNotification extends BaseNotification
     ) {}
 
     /**
-     * @return list<string>
-     */
-    public function channels(): array
-    {
-        return ['push'];
-    }
-
-    /**
-     * Dispatch strategy: 'sync' | 'queue' | 'event'.
-     */
-    public function dispatchMethod(): string
-    {
-        return 'sync';
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public function data(): array

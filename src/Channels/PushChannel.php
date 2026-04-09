@@ -39,6 +39,7 @@ final class PushChannel implements NotificationChannel
             channel: $payload->pusherChannel(),
             event: $payload->event(),
             data: $data,
+            private: $payload->isPrivate(),
         ));
     }
 }

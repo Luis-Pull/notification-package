@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Packages\Notifications\Events;
 
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Queue\SerializesModels;
 
@@ -19,6 +20,7 @@ final class GenericPushEvent implements ShouldBroadcastNow
         private readonly string $channel,
         private readonly string $event,
         private readonly array $data = [],
+        private readonly bool $private = false,
     ) {}
 
     /**
@@ -28,7 +30,7 @@ final class GenericPushEvent implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [new Channel($this->channel)];
+        return [$this->private ? new PrivateChannel($this->channel) : new Channel($this->channel)];
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use Packages\Notifications\Channels\MailChannel;
 use Packages\Notifications\Channels\PushChannel;
 use Packages\Notifications\Channels\SmsChannel;
@@ -21,9 +22,30 @@ return [
     'views_path' => resource_path('views/notifications'),
 
     /*
-     | Default dispatch strategy: 'sync' | 'queue' | 'event'
+     | Default notification channel used by BaseNotification
+     | and GenericNotification when none is specified.
+    */
+    'default_channel' => 'mail',
+
+    /*
+     | Default dispatch strategy: 'sync' | 'queue' | 'event'.
     */
     'default_dispatch' => 'queue',
+
+    /*
+     | Queue name used by QueueDispatch and SendNotificationJob.
+    */
+    'queue' => 'notifications',
+
+    /*
+     | Registered delivery channels. Add custom channels here.
+    */
+    'channels' => [
+        'mail' => MailChannel::class,
+        'sms' => SmsChannel::class,
+        'push' => PushChannel::class,
+        'whatsapp' => WhatsappChannel::class,
+    ],
 
     /*
      | Available dispatch strategies.
@@ -37,22 +59,31 @@ return [
     ],
 
     /*
-     | Default channel used by GenericNotification when no channel is provided.
+     | Push notification configuration.
+     | Channels are resolved by alias, placeholders are replaced
+     | from notification parameters, and private aliases are
+     | registered automatically by the package service provider.
     */
-    'default_channel' => 'mail',
+    'push' => [
+        'channels' => [
+            'public' => [
+                'type' => 'public',
+                'name' => 'batchnav.notifications.public',
+            ],
+            'private' => [
+                'type' => 'private',
+                'name' => 'batchnav.notifications.private.{id}',
+            ],
+        ],
 
-    /*
-     | Queue name used by QueueDispatch and SendNotificationJob
-    */
-    'queue' => 'notifications',
+        'actions' => [
+            'created',
+            'updated',
+            'deleted',
+        ],
 
-    /*
-     | Registered channels. Add custom channels here.
-    */
-    'channels' => [
-        'mail' => MailChannel::class,
-        'sms' => SmsChannel::class,
-        'push' => PushChannel::class,
-        'whatsapp' => WhatsappChannel::class,
+        'defaults' => [
+            'channel' => 'public',
+        ],
     ],
 ];

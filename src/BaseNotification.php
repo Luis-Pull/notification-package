@@ -9,6 +9,7 @@ use Packages\Notifications\Payloads\MailPayload;
 use Packages\Notifications\Payloads\PushPayload;
 use Packages\Notifications\Payloads\SmsPayload;
 use Packages\Notifications\Payloads\WhatsappPayload;
+use Packages\Notifications\Support\PushConfigResolver;
 
 class BaseNotification
 {
@@ -58,6 +59,24 @@ class BaseNotification
      * Push channel used when the notification is sent through `push`.
      */
     public function pushChannel(): ?string
+    {
+        return (string) config('notifications.push.defaults.channel', 'public');
+    }
+
+    /**
+     * Push channel placeholder parameters.
+     *
+     * @return array<string, scalar|null>
+     */
+    public function pushChannelParameters(): array
+    {
+        return [];
+    }
+
+    /**
+     * Push action used to validate the final event action suffix.
+     */
+    public function pushAction(): ?string
     {
         return null;
     }
@@ -114,11 +133,22 @@ class BaseNotification
             return null;
         }
 
-        return new PushPayload(
+        $resolver = app(PushConfigResolver::class);
+        $resolvedChannel = $resolver->resolveChannel(
             $this->pushChannel(),
+            $this->pushChannelParameters(),
+        );
+
+        if ($this->pushAction() !== null) {
+            $resolver->assertValidAction($this->pushAction());
+        }
+
+        return new PushPayload(
+            $resolvedChannel['name'],
             $this->pushEvent(),
             $this->data(),
             $this->template('push'),
+            $resolvedChannel['type'] === 'private',
         );
     }
 
